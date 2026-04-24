@@ -12,6 +12,7 @@ on:
 
 env:
   FLUTTER_VERSION: '3.29.3'
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
 
 permissions:
   contents: write
