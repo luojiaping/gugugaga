@@ -53,7 +53,8 @@ class AlistService {
     }
 
     _token = body['data']?['token'];
-    if (_token == null || _token.isEmpty) {
+    final token = _token;
+    if (token == null || token.isEmpty) {
       throw Exception('Alist登录错误: 未获取到token');
     }
   }
@@ -62,9 +63,10 @@ class AlistService {
     final uri = Uri.parse('$serverUrl/api/fs/list');
     
     // 构建请求头
-    final headers = {'Content-Type': 'application/json'};
-    if (_token != null && _token.isNotEmpty) {
-      headers['Authorization'] = _token;
+    final headers = <String, String>{'Content-Type': 'application/json'};
+    final token = _token;
+    if (token != null && token.isNotEmpty) {
+      headers['Authorization'] = token;
     }
     
     final response = await http.post(
