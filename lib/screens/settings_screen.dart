@@ -3,15 +3,23 @@ import 'package:flutter/material.dart';
 class SettingsScreen extends StatelessWidget {
   final String serverUrl;
   final void Function(String url) onServerUrlChanged;
+  final void Function(String username) onUsernameChanged;
+  final void Function(String password) onPasswordChanged;
   final void Function() onThemeToggled;
   final bool isDarkMode;
+  final String username;
+  final String password;
 
   const SettingsScreen({
     super.key,
     required this.serverUrl,
     required this.onServerUrlChanged,
+    required this.onUsernameChanged,
+    required this.onPasswordChanged,
     required this.onThemeToggled,
     required this.isDarkMode,
+    required this.username,
+    required this.password,
   });
 
   @override
@@ -34,6 +42,29 @@ class SettingsScreen extends StatelessWidget {
                     style: Theme.of(context).textTheme.bodyMedium),
                 const SizedBox(height: 12),
                 _ServerUrlField(onSubmitted: onServerUrlChanged),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        // 登录认证
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('登录认证', style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 8),
+                Text('当前用户: ${username.isEmpty ? "未登录" : username}',
+                    style: Theme.of(context).textTheme.bodyMedium),
+                const SizedBox(height: 12),
+                _LoginField(
+                  username: username,
+                  password: password,
+                  onUsernameChanged: onUsernameChanged,
+                  onPasswordChanged: onPasswordChanged,
+                ),
               ],
             ),
           ),
@@ -98,6 +129,84 @@ class _ServerUrlFieldState extends State<_ServerUrlField> {
         FilledButton(
           onPressed: () => widget.onSubmitted(_controller.text),
           child: const Text('保存'),
+        ),
+      ],
+    );
+  }
+}
+
+class _LoginField extends StatefulWidget {
+  final String username;
+  final String password;
+  final void Function(String username) onUsernameChanged;
+  final void Function(String password) onPasswordChanged;
+
+  const _LoginField({
+    required this.username,
+    required this.password,
+    required this.onUsernameChanged,
+    required this.onPasswordChanged,
+  });
+
+  @override
+  State<_LoginField> createState() => _LoginFieldState();
+}
+
+class _LoginFieldState extends State<_LoginField> {
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _usernameController.text = widget.username;
+    _passwordController.text = widget.password;
+  }
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        TextField(
+          controller: _usernameController,
+          decoration: const InputDecoration(
+            labelText: '用户名',
+            hintText: '输入Alist用户名',
+            isDense: true,
+            border: OutlineInputBorder(),
+          ),
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: _passwordController,
+          decoration: const InputDecoration(
+            labelText: '密码',
+            hintText: '输入Alist密码',
+            isDense: true,
+            border: OutlineInputBorder(),
+          ),
+          obscureText: true,
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: FilledButton(
+                onPressed: () {
+                  widget.onUsernameChanged(_usernameController.text);
+                  widget.onPasswordChanged(_passwordController.text);
+                },
+                child: const Text('保存登录信息'),
+              ),
+            ),
+          ],
         ),
       ],
     );
