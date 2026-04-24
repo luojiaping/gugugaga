@@ -83,11 +83,11 @@ class SettingsScreen extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         // 关于
-        Card(
+        const Card(
           child: ListTile(
-            leading: const Icon(Icons.info),
-            title: const Text('关于'),
-            subtitle: const Text('咕咕嘎嘎 v1.0.0\n基于 Flutter + Alist 的影视播放App'),
+            leading: Icon(Icons.info),
+            title: Text('关于'),
+            subtitle: Text('咕咕嘎嘎 v1.0.0\n基于 Flutter + Alist 的影视播放App'),
           ),
         ),
       ],
