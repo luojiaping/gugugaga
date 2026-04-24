@@ -33,7 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     if (widget.serverUrl.isNotEmpty) {
-      _loginAndLoadFiles();
+      unawaited(_loginAndLoadFiles());
     }
   }
 
@@ -47,14 +47,14 @@ class _HomeScreenState extends State<HomeScreen> {
       _currentPath = '/';
       _isLoggedIn = false;
       if (widget.serverUrl.isNotEmpty) {
-        _loginAndLoadFiles();
+        unawaited(_loginAndLoadFiles());
       }
     }
   }
 
   Future<void> _loginAndLoadFiles() async {
     if (widget.serverUrl.isEmpty) return;
-    
+
     // 如果有用户名密码，先登录
     if (widget.username.isNotEmpty && widget.password.isNotEmpty) {
       try {
@@ -70,9 +70,9 @@ class _HomeScreenState extends State<HomeScreen> {
         return;
       }
     }
-    
+
     // 登录成功后加载文件
-    _loadFiles(_currentPath);
+    unawaited(_loadFiles(_currentPath));
   }
 
   Future<void> _loadFiles(String path) async {
@@ -103,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (file.isDir) {
       _pathStack.add(_currentPath);
       setState(() => _currentPath = file.path);
-      _loadFiles(file.path);
+      unawaited(_loadFiles(file.path));
     } else if (_isVideo(file.name)) {
       final playUrl = _service.getPlayUrl(widget.serverUrl, file.path);
       widget.onPlay(playUrl, file.name);
@@ -127,7 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_pathStack.isNotEmpty) {
       final prev = _pathStack.removeLast();
       setState(() => _currentPath = prev);
-      _loadFiles(prev);
+      unawaited(_loadFiles(prev));
     }
   }
 
@@ -170,7 +170,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               IconButton(
                 icon: const Icon(Icons.refresh),
-                onPressed: () => _loadFiles(_currentPath),
+                onPressed: () => unawaited(_loadFiles(_currentPath)),
               ),
             ],
           ),
@@ -190,7 +190,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           const SizedBox(height: 4),
                           Text(_error, style: Theme.of(context).textTheme.bodySmall, textAlign: TextAlign.center),
                           const SizedBox(height: 16),
-                          FilledButton(onPressed: () => _loginAndLoadFiles(), child: const Text('重试')),
+                          FilledButton(onPressed: () => unawaited(_loginAndLoadFiles()), child: const Text('重试')),
                         ],
                       ),
                     )
