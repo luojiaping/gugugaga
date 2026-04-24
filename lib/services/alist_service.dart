@@ -53,7 +53,7 @@ class AlistService {
     }
 
     _token = body['data']?['token'];
-    if (_token == null || _token!.isEmpty) {
+    if (_token == null || _token.isEmpty) {
       throw Exception('Alist登录错误: 未获取到token');
     }
   }
@@ -63,8 +63,8 @@ class AlistService {
     
     // 构建请求头
     final headers = {'Content-Type': 'application/json'};
-    if (_token != null && _token!.isNotEmpty) {
-      headers['Authorization'] = _token!;
+    if (_token != null && _token.isNotEmpty) {
+      headers['Authorization'] = _token;
     }
     
     final response = await http.post(
