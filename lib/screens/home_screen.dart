@@ -29,7 +29,6 @@ class _HomeScreenState extends State<HomeScreen> {
   String _error = '';
   String _currentPath = '/';
   final List<String> _pathStack = [];
-  bool _isLoggedIn = false;
 
   @override
   void initState() {
@@ -47,7 +46,6 @@ class _HomeScreenState extends State<HomeScreen> {
         widget.password != old.password) {
       _pathStack.clear();
       _currentPath = '/';
-      _isLoggedIn = false;
       if (widget.serverUrl.isNotEmpty) {
         unawaited(_loginAndLoadFiles());
       }
@@ -61,7 +59,6 @@ class _HomeScreenState extends State<HomeScreen> {
     if (widget.username.isNotEmpty && widget.password.isNotEmpty) {
       try {
         await _service.login(widget.serverUrl, widget.username, widget.password);
-        _isLoggedIn = true;
       } catch (e) {
         if (mounted) {
           setState(() {
