@@ -1,11 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 class SettingsScreen extends StatelessWidget {
   final String serverUrl;
-  final void Function(String url) onServerUrlChanged;
-  final void Function(String username) onUsernameChanged;
-  final void Function(String password) onPasswordChanged;
-  final void Function() onThemeToggled;
+  final Future<void> Function(String url) onServerUrlChanged;
+  final Future<void> Function(String username) onUsernameChanged;
+  final Future<void> Function(String password) onPasswordChanged;
+  final Future<void> Function() onThemeToggled;
   final bool isDarkMode;
   final String username;
   final String password;
@@ -76,7 +78,7 @@ class SettingsScreen extends StatelessWidget {
             title: const Text('深色模式'),
             subtitle: Text(isDarkMode ? '当前：深色' : '当前：浅色'),
             value: isDarkMode,
-            onChanged: (_) => onThemeToggled(),
+            onChanged: (_) => unawaited(onThemeToggled()),
           ),
         ),
         const SizedBox(height: 16),
@@ -94,7 +96,7 @@ class SettingsScreen extends StatelessWidget {
 }
 
 class _ServerUrlField extends StatefulWidget {
-  final void Function(String url) onSubmitted;
+  final Future<void> Function(String url) onSubmitted;
   const _ServerUrlField({required this.onSubmitted});
 
   @override
@@ -122,12 +124,12 @@ class _ServerUrlFieldState extends State<_ServerUrlField> {
               isDense: true,
               border: OutlineInputBorder(),
             ),
-            onSubmitted: widget.onSubmitted,
+            onSubmitted: (value) => unawaited(widget.onSubmitted(value)),
           ),
         ),
         const SizedBox(width: 8),
         FilledButton(
-          onPressed: () => widget.onSubmitted(_controller.text),
+          onPressed: () => unawaited(widget.onSubmitted(_controller.text)),
           child: const Text('保存'),
         ),
       ],
@@ -138,8 +140,8 @@ class _ServerUrlFieldState extends State<_ServerUrlField> {
 class _LoginField extends StatefulWidget {
   final String username;
   final String password;
-  final void Function(String username) onUsernameChanged;
-  final void Function(String password) onPasswordChanged;
+  final Future<void> Function(String username) onUsernameChanged;
+  final Future<void> Function(String password) onPasswordChanged;
 
   const _LoginField({
     required this.username,
@@ -200,8 +202,8 @@ class _LoginFieldState extends State<_LoginField> {
             Expanded(
               child: FilledButton(
                 onPressed: () {
-                  widget.onUsernameChanged(_usernameController.text);
-                  widget.onPasswordChanged(_passwordController.text);
+                  unawaited(widget.onUsernameChanged(_usernameController.text));
+                  unawaited(widget.onPasswordChanged(_passwordController.text));
                 },
                 child: const Text('保存登录信息'),
               ),
