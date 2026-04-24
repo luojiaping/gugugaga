@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/home_screen.dart';
@@ -46,7 +48,7 @@ class _GuGuGaGaAppState extends State<GuGuGaGaApp> {
     _serverUrl = widget.serverUrl;
     _username = widget.username;
     _password = widget.password;
-    _loadPrefs();
+    unawaited(_loadPrefs());
   }
 
   Future<void> _loadPrefs() async {
