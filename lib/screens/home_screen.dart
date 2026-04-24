@@ -4,11 +4,15 @@ import '../widgets/file_list_tile.dart';
 
 class HomeScreen extends StatefulWidget {
   final String serverUrl;
+  final String username;
+  final String password;
   final void Function(String url, String title) onPlay;
 
   const HomeScreen({
     super.key,
     required this.serverUrl,
+    required this.username,
+    required this.password,
     required this.onPlay,
   });
 
@@ -23,23 +27,52 @@ class _HomeScreenState extends State<HomeScreen> {
   String _error = '';
   String _currentPath = '/';
   final List<String> _pathStack = [];
+  bool _isLoggedIn = false;
 
   @override
   void initState() {
     super.initState();
     if (widget.serverUrl.isNotEmpty) {
-      _loadFiles(_currentPath);
+      _loginAndLoadFiles();
     }
   }
 
   @override
   void didUpdateWidget(HomeScreen old) {
     super.didUpdateWidget(old);
-    if (widget.serverUrl != old.serverUrl && widget.serverUrl.isNotEmpty) {
+    if (widget.serverUrl != old.serverUrl ||
+        widget.username != old.username ||
+        widget.password != old.password) {
       _pathStack.clear();
       _currentPath = '/';
-      _loadFiles(_currentPath);
+      _isLoggedIn = false;
+      if (widget.serverUrl.isNotEmpty) {
+        _loginAndLoadFiles();
+      }
     }
+  }
+
+  Future<void> _loginAndLoadFiles() async {
+    if (widget.serverUrl.isEmpty) return;
+    
+    // 如果有用户名密码，先登录
+    if (widget.username.isNotEmpty && widget.password.isNotEmpty) {
+      try {
+        await _service.login(widget.serverUrl, widget.username, widget.password);
+        _isLoggedIn = true;
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _error = '登录失败: ${e.toString()}';
+            _loading = false;
+          });
+        }
+        return;
+      }
+    }
+    
+    // 登录成功后加载文件
+    _loadFiles(_currentPath);
   }
 
   Future<void> _loadFiles(String path) async {
@@ -157,7 +190,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           const SizedBox(height: 4),
                           Text(_error, style: Theme.of(context).textTheme.bodySmall, textAlign: TextAlign.center),
                           const SizedBox(height: 16),
-                          FilledButton(onPressed: () => _loadFiles(_currentPath), child: const Text('重试')),
+                          FilledButton(onPressed: () => _loginAndLoadFiles(), child: const Text('重试')),
                         ],
                       ),
                     )
