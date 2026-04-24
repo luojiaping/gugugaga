@@ -3,7 +3,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/home_screen.dart';
 import 'screens/player_screen.dart';
 import 'screens/settings_screen.dart';
-import 'services/alist_service.dart';
 import 'theme/app_theme.dart';
 
 void main() async {
