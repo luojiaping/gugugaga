@@ -1,0 +1,105 @@
+import 'package:flutter/material.dart';
+
+class SettingsScreen extends StatelessWidget {
+  final String serverUrl;
+  final void Function(String url) onServerUrlChanged;
+  final void Function() onThemeToggled;
+  final bool isDarkMode;
+
+  const SettingsScreen({
+    super.key,
+    required this.serverUrl,
+    required this.onServerUrlChanged,
+    required this.onThemeToggled,
+    required this.isDarkMode,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        Text('设置', style: Theme.of(context).textTheme.headlineMedium),
+        const SizedBox(height: 24),
+        // 服务器地址
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Alist 服务器', style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 8),
+                Text('当前地址: ${serverUrl.isEmpty ? "未配置" : serverUrl}',
+                    style: Theme.of(context).textTheme.bodyMedium),
+                const SizedBox(height: 12),
+                _ServerUrlField(onSubmitted: onServerUrlChanged),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        // 主题切换
+        Card(
+          child: SwitchListTile(
+            title: const Text('深色模式'),
+            subtitle: Text(isDarkMode ? '当前：深色' : '当前：浅色'),
+            value: isDarkMode,
+            onChanged: (_) => onThemeToggled(),
+          ),
+        ),
+        const SizedBox(height: 16),
+        // 关于
+        Card(
+          child: ListTile(
+            leading: const Icon(Icons.info),
+            title: const Text('关于'),
+            subtitle: const Text('咕咕嘎嘎 v1.0.0\n基于 Flutter + Alist 的影视播放App'),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ServerUrlField extends StatefulWidget {
+  final void Function(String url) onSubmitted;
+  const _ServerUrlField({required this.onSubmitted});
+
+  @override
+  State<_ServerUrlField> createState() => _ServerUrlFieldState();
+}
+
+class _ServerUrlFieldState extends State<_ServerUrlField> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: TextField(
+            controller: _controller,
+            decoration: const InputDecoration(
+              hintText: '输入Alist服务器地址',
+              isDense: true,
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: widget.onSubmitted,
+          ),
+        ),
+        const SizedBox(width: 8),
+        FilledButton(
+          onPressed: () => widget.onSubmitted(_controller.text),
+          child: const Text('保存'),
+        ),
+      ],
+    );
+  }
+}
