@@ -9,12 +9,25 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
   final serverUrl = prefs.getString('server_url') ?? '';
-  runApp(GuGuGaGaApp(serverUrl: serverUrl));
+  final username = prefs.getString('username') ?? '';
+  final password = prefs.getString('password') ?? '';
+  runApp(GuGuGaGaApp(
+    serverUrl: serverUrl,
+    username: username,
+    password: password,
+  ));
 }
 
 class GuGuGaGaApp extends StatefulWidget {
   final String serverUrl;
-  const GuGuGaGaApp({super.key, required this.serverUrl});
+  final String username;
+  final String password;
+  const GuGuGaGaApp({
+    super.key,
+    required this.serverUrl,
+    required this.username,
+    required this.password,
+  });
 
   @override
   State<GuGuGaGaApp> createState() => _GuGuGaGaAppState();
@@ -23,12 +36,16 @@ class GuGuGaGaApp extends StatefulWidget {
 class _GuGuGaGaAppState extends State<GuGuGaGaApp> {
   ThemeMode _themeMode = ThemeMode.system;
   String _serverUrl = '';
+  String _username = '';
+  String _password = '';
   int _currentIndex = 0;
 
   @override
   void initState() {
     super.initState();
     _serverUrl = widget.serverUrl;
+    _username = widget.username;
+    _password = widget.password;
     _loadPrefs();
   }
 
@@ -36,6 +53,8 @@ class _GuGuGaGaAppState extends State<GuGuGaGaApp> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       _serverUrl = prefs.getString('server_url') ?? '';
+      _username = prefs.getString('username') ?? '';
+      _password = prefs.getString('password') ?? '';
       final darkMode = prefs.getBool('dark_mode');
       if (darkMode != null) {
         _themeMode = darkMode ? ThemeMode.dark : ThemeMode.light;
@@ -47,6 +66,18 @@ class _GuGuGaGaAppState extends State<GuGuGaGaApp> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('server_url', url);
     setState(() => _serverUrl = url);
+  }
+
+  void _updateUsername(String username) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('username', username);
+    setState(() => _username = username);
+  }
+
+  void _updatePassword(String password) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('password', password);
+    setState(() => _password = password);
   }
 
   void _toggleTheme() async {
@@ -71,11 +102,17 @@ class _GuGuGaGaAppState extends State<GuGuGaGaApp> {
           children: [
             HomeScreen(
               serverUrl: _serverUrl,
+              username: _username,
+              password: _password,
               onPlay: (url, title) => _navigateToPlayer(url, title),
             ),
             SettingsScreen(
               serverUrl: _serverUrl,
+              username: _username,
+              password: _password,
               onServerUrlChanged: _updateServerUrl,
+              onUsernameChanged: _updateUsername,
+              onPasswordChanged: _updatePassword,
               onThemeToggled: _toggleTheme,
               isDarkMode: _themeMode == ThemeMode.dark,
             ),
