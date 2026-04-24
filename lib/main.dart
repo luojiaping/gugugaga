@@ -62,25 +62,25 @@ class _GuGuGaGaAppState extends State<GuGuGaGaApp> {
     });
   }
 
-  void _updateServerUrl(String url) async {
+  Future<void> _updateServerUrl(String url) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('server_url', url);
     setState(() => _serverUrl = url);
   }
 
-  void _updateUsername(String username) async {
+  Future<void> _updateUsername(String username) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('username', username);
     setState(() => _username = username);
   }
 
-  void _updatePassword(String password) async {
+  Future<void> _updatePassword(String password) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('password', password);
     setState(() => _password = password);
   }
 
-  void _toggleTheme() async {
+  Future<void> _toggleTheme() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       _themeMode = _themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
