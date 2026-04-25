@@ -15,23 +15,22 @@ class AlistFile {
     required this.isDir,
     required this.modified,
   });
-
-  factory AlistFile.fromJson(Map<String, dynamic> json) {
-    return AlistFile(
-      name: json['name'] as String? ?? '',
-      path: json['path'] ?? json['name'] ?? '',
-      size: json['size'] as int? ?? 0,
-      isDir: json['is_dir'] as bool? ?? false,
-      modified: json['modified'] as String? ?? '',
-    );
-  }
 }
 
 class AlistService {
   String? _token;
-  
+
+  /// 标准化服务器URL，去除尾部斜杠
+  String _normalizeUrl(String url) {
+    while (url.endsWith('/')) {
+      url = url.substring(0, url.length - 1);
+    }
+    return url;
+  }
+
   // 登录获取token
   Future<void> login(String serverUrl, String username, String password) async {
+    serverUrl = _normalizeUrl(serverUrl);
     final uri = Uri.parse('$serverUrl/api/auth/login');
     final response = await http.post(
       uri,
@@ -59,7 +58,8 @@ class AlistService {
     }
   }
 
-  Future<List<AlistFile>> listFiles(String serverUrl, String path) async {
+  Future<List<AlistFile>> listFiles(String serverUrl, String dirPath) async {
+    serverUrl = _normalizeUrl(serverUrl);
     final uri = Uri.parse('$serverUrl/api/fs/list');
     
     // 构建请求头
@@ -73,7 +73,7 @@ class AlistService {
       uri,
       headers: headers,
       body: jsonEncode({
-        'path': path,
+        'path': dirPath,
         'page': 1,
         'per_page': 200,
       }),
@@ -90,10 +90,23 @@ class AlistService {
     }
 
     final data = body['data']?['content'] as List? ?? [];
-    return data.map((e) => AlistFile.fromJson(e as Map<String, dynamic>)).toList();
+    return data.map((e) {
+      final item = e as Map<String, dynamic>;
+      // Alist /api/fs/list 不返回path字段，需要手动拼接完整路径
+      final name = item['name'] as String? ?? '';
+      final fullPath = dirPath == '/' ? '/$name' : '$dirPath/$name';
+      return AlistFile(
+        name: name,
+        path: fullPath,
+        size: item['size'] as int? ?? 0,
+        isDir: item['is_dir'] as bool? ?? false,
+        modified: item['modified'] as String? ?? '',
+      );
+    }).toList();
   }
 
   String getPlayUrl(String serverUrl, String path) {
+    serverUrl = _normalizeUrl(serverUrl);
     // Alist的直链地址
     return '$serverUrl/d$path';
   }
