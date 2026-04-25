@@ -99,15 +99,37 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onTileTap(AlistFile file) {
+    // 优先检查是否是可播放的媒体文件，即使isDir为true也检查
+    // （某些Alist存储驱动会将文件错误标记为目录）
+    if (_isVideo(file.name) || _isAudio(file.name)) {
+      _playFile(file);
+      return;
+    }
+    // 如果是目录，进入子目录
     if (file.isDir) {
       _pathStack.add(_currentPath);
       setState(() => _currentPath = file.path);
       unawaited(_loadFiles(file.path));
-    } else if (_isVideo(file.name)) {
-      final playUrl = _service.getPlayUrl(widget.serverUrl, file.path);
+    }
+    // 非视频非音频非目录的文件，暂不处理
+  }
+
+  Future<void> _playFile(AlistFile file) async {
+    try {
+      // 优先使用/api/fs/get获取真实直链URL
+      final playUrl = await _service.getPlayUrl(
+        widget.serverUrl,
+        file.path,
+        sign: file.sign,
+      );
       widget.onPlay(playUrl, file.name);
-    } else if (_isAudio(file.name)) {
-      final playUrl = _service.getPlayUrl(widget.serverUrl, file.path);
+    } catch (e) {
+      // /api/fs/get失败时，回退到直接拼接直链
+      final playUrl = _service.getPlayUrlSync(
+        widget.serverUrl,
+        file.path,
+        sign: file.sign,
+      );
       widget.onPlay(playUrl, file.name);
     }
   }
