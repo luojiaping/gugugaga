@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:webview_flutter_android/webview_flutter_android.dart';
 
 class PlayerScreen extends StatefulWidget {
   final String url;
@@ -26,8 +27,23 @@ class _PlayerScreenState extends State<PlayerScreen> {
           onPageFinished: (_) => setState(() => _loading = false),
           onWebResourceError: (e) => setState(() => _error = e.description),
         ),
-      )
-      ..loadRequest(Uri.parse(widget.url));
+      );
+
+    // Android平台：允许混合内容（HTTP+HTTPS），设置WebView兼容HTTP
+    final platform = _controller.platform;
+    if (platform is AndroidWebViewController) {
+      AndroidWebViewController.enableDebugging(true);
+      platform.setMediaPlaybackRequiresUserGesture(false);
+      // 允许混合内容模式，使HTTP URL也能在WebView中加载
+      platform.loadRequest(
+        LoadRequestParams(
+          uri: Uri.parse(widget.url),
+          headers: {'Accept': 'video/*, application/json, */*'},
+        ),
+      );
+    } else {
+      _controller.loadRequest(Uri.parse(widget.url));
+    }
   }
 
   @override
@@ -49,6 +65,17 @@ class _PlayerScreenState extends State<PlayerScreen> {
                   Text('播放失败', style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 4),
                   Text(_error!, style: Theme.of(context).textTheme.bodySmall, textAlign: TextAlign.center),
+                  const SizedBox(height: 16),
+                  FilledButton(
+                    onPressed: () {
+                      setState(() {
+                        _error = null;
+                        _loading = true;
+                      });
+                      _controller.loadRequest(Uri.parse(widget.url));
+                    },
+                    child: const Text('重试'),
+                  ),
                 ],
               ),
             ),
